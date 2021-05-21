@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:octopus_attendance_book/screen/screen_login.dart';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -7,7 +9,27 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
   @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => LoginScreen()),
+        (route) => false,
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    SystemChrome.setEnabledSystemUIOverlays([]);
+
+    return Scaffold(
+      body: Center(
+        child: Container(
+          child: Image.asset('images/logo.png'),
+        ),
+      ),
+    );
   }
 }

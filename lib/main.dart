@@ -9,9 +9,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
+        title: 'OP_App',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          primarySwatch: Colors.blue,
+          primaryColor: const Color(0xffe4fbff),
         ),
         home: LoadingScreen());
   }
