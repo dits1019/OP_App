@@ -16,10 +16,13 @@ class LoginTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(width * 0.01),
       ),
       child: TextField(
         obscureText: hideText,
@@ -34,7 +37,7 @@ class LoginTextField extends StatelessWidget {
             color: Colors.grey,
           ),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.all(20),
+          contentPadding: EdgeInsets.all(width * 0.03),
         ),
       ),
     );

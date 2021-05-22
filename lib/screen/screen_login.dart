@@ -2,17 +2,41 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:octopus_attendance_book/widget/widget_textfield.dart';
 import 'package:octopus_attendance_book/widget/widget_wave.dart';
 import 'package:simple_animations/simple_animations.dart';
 
 class LoginScreen extends StatefulWidget {
+  dynamic parseWeatherData;
+
+  LoginScreen({this.parseWeatherData});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  @override
+  void initState() {
+    super.initState();
+    updateData(widget.parseWeatherData);
+    print(widget.parseWeatherData);
+  }
+
+  // 온도
+  int temp;
+  // 날씨
+  String detail_weather;
+  String iconData;
+
+  void updateData(dynamic weatherData) {
+    temp = weatherData['main']['temp'].round();
+    detail_weather = weatherData['weather'][0]['description'];
+    print('test : $temp, $detail_weather');
+    iconData = weatherData['weather'][0]['icon'];
+    // print(iconData);
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -69,6 +93,39 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             Align(
+                alignment: Alignment(0.0, -0.9),
+                child: Container(
+                  width: width * 0.3,
+                  height: height * 0.3,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        child: Image.network(
+                          'https://openweathermap.org/img/w/$iconData.png',
+                          fit: BoxFit.cover,
+                          width: width * 0.27,
+                          height: height * 0.1,
+                        ),
+                      ),
+                      Text(
+                        detail_weather,
+                        style: TextStyle(fontFamily: 'Yangjin', fontSize: 30),
+                      ),
+                      SizedBox(
+                        height: height * 0.02,
+                      ),
+                      Text(
+                        '${temp.toString()}°C',
+                        style: TextStyle(
+                            fontFamily: 'Yangjin',
+                            fontSize: 25,
+                            color: Color(0xfffb3640)),
+                      ),
+                    ],
+                  ),
+                )),
+            Align(
               alignment: Alignment.center,
               child: Padding(
                 padding:
@@ -98,11 +155,12 @@ class _LoginScreenState extends State<LoginScreen> {
             Align(
               alignment: Alignment(0.0, 0.8),
               child: CircleAvatar(
-                radius: 30,
+                radius: width * 0.08,
                 backgroundColor: Colors.blueAccent[700],
                 child: IconButton(
                   color: Colors.white,
                   icon: Icon(Icons.done),
+                  iconSize: width * 0.08,
                   onPressed: () {},
                 ),
               ),
