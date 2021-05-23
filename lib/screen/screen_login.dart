@@ -4,7 +4,8 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_uploader/flutter_uploader.dart';
+import 'package:flutter_dropdown_alert/alert_controller.dart';
+import 'package:flutter_dropdown_alert/model/data_alert.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:octopus_attendance_book/widget/widget_textfield.dart';
@@ -22,16 +23,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final uploader = FlutterUploader();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   var url;
-
-  @override
-  void initState() {
-    super.initState();
-    updateData(widget.parseWeatherData);
-  }
 
   // 온도
   int temp;
@@ -40,7 +34,12 @@ class _LoginScreenState extends State<LoginScreen> {
   String iconData;
   // 도시이름
   String cityName;
-  String msg;
+
+  @override
+  void initState() {
+    super.initState();
+    updateData(widget.parseWeatherData);
+  }
 
   void updateData(dynamic weatherData) {
     cityName = weatherData['name'];
@@ -70,24 +69,20 @@ class _LoginScreenState extends State<LoginScreen> {
       // final _result = json.decode(response.body);
       // final _result = jsonDecode(response.body);
       final _result = utf8.decode(response.bodyBytes);
-      print(_body);
-      print('성공');
-      print(msg);
-
-      showToast(jsonDecode(_result)['msg']);
+      // print(_body);
+      // print('성공');
+      // showToast(jsonDecode(_result)['msg']);
+      AlertController.show(
+          '알림',
+          jsonDecode(_result)['msg'],
+          jsonDecode(_result)['result'] == 'success'
+              ? TypeAlert.success
+              : TypeAlert.error);
       return _result;
     } catch (e) {
-      print(e.toString());
+      print(e);
+      showToast('오류가 발생했습니다');
     }
-
-    // await uploader.enqueue(
-    //     url: url,
-    //     files: null,
-    //     method: UploadMethod.POST,
-    //     data: <String, String>{
-    //       'email': emailController.text.toString(),
-    //       'pw': passwordController.text.toString()
-    //     });
   }
 
   @override
@@ -233,12 +228,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   icon: Icon(Icons.done),
                   iconSize: width * 0.08,
                   onPressed: () {
-                    if (cityName == 'Banpobondong') {
-                      urlRequest(
-                          email: emailController.text.toString(),
-                          pw: passwordController.text.toString());
+                    if (emailController.text.isEmpty ||
+                        passwordController.text.isEmpty) {
+                      AlertController.show(
+                          '알림', 'Email 혹은 Password를 입력해주세요', TypeAlert.error);
                     } else {
-                      showToast('불일치');
+                      if (cityName == 'Banpobondong') {
+                        urlRequest(
+                            email: emailController.text.toString(),
+                            pw: passwordController.text.toString());
+                      } else {
+                        // showToast('불일치');
+                        AlertController.show(
+                            '알림', '학교 주변에서 다시 앱을 실행해주세요.', TypeAlert.error);
+                      }
                     }
                   },
                 ),

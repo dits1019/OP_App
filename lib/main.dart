@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dropdown_alert/dropdown_alert.dart';
 import 'package:octopus_attendance_book/screen/screen_loading.dart';
 import 'package:flutter/services.dart';
 
@@ -13,9 +14,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'OP_App',
         debugShowCheckedModeBanner: false,
+        builder: (context, child) => Stack(
+              children: [child, DropdownAlert()],
+            ),
         theme: ThemeData(
-          primaryColor: const Color(0xffe4fbff),
-        ),
+            primaryColor: const Color(0xffe4fbff), fontFamily: 'Yangjin'),
         home: LoadingScreen());
   }
 }

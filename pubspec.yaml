@@ -36,7 +36,7 @@ dependencies:
   intl: ^0.17.0
   crypto: ^3.0.1
   fluttertoast: ^8.0.7
-  flutter_uploader: ^1.2.1
+  flutter_dropdown_alert: ^1.0.2
 
 dev_dependencies:
   flutter_test:
