@@ -14,8 +14,12 @@ class Network {
     // 200은 정상
     if (response.statusCode == 200) {
       // response.body는 본문 전체를 가져오기
-      String jsonData = response.body;
-      var parsingData = jsonDecode(jsonData);
+      // String jsonData = response.body;
+
+      // utf8 형식으로 가져오기
+      var decodeData = utf8.decode(response.bodyBytes);
+
+      var parsingData = jsonDecode(decodeData);
       return parsingData;
     }
   }

@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart';
 import 'package:octopus_attendance_book/data/my_location.dart';
 import 'package:octopus_attendance_book/data/network.dart';
 import 'package:octopus_attendance_book/screen/screen_login.dart';
@@ -26,12 +29,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
     await myLocation.getMyCurrentLocation();
     latitude3 = myLocation.latitude2;
     longitude3 = myLocation.longitude2;
-    // print('$latitude3, $longitude3');
 
-    Network network = Network(
+    Network weatherNetwork = Network(
         'https://api.openweathermap.org/data/2.5/weather?lat=$latitude3&lon=$longitude3&appid=$apikey&units=metric&lang=kr');
 
-    var weatherData = await network.getJsonData();
+    var weatherData = await weatherNetwork.getJsonData();
+
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
@@ -48,7 +51,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Scaffold(
       body: Center(
         child: Container(
-          child: Image.asset('images/logo.png'),
+          child: Image.asset('images/intro'),
         ),
       ),
     );

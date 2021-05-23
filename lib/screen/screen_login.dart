@@ -1,10 +1,16 @@
+import 'dart:convert';
 import 'dart:math';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_uploader/flutter_uploader.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:octopus_attendance_book/widget/widget_textfield.dart';
 import 'package:octopus_attendance_book/widget/widget_wave.dart';
 import 'package:simple_animations/simple_animations.dart';
+import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
   dynamic parseWeatherData;
@@ -16,11 +22,15 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final uploader = FlutterUploader();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  var url;
+
   @override
   void initState() {
     super.initState();
     updateData(widget.parseWeatherData);
-    print(widget.parseWeatherData);
   }
 
   // 온도
@@ -28,13 +38,72 @@ class _LoginScreenState extends State<LoginScreen> {
   // 날씨
   String detail_weather;
   String iconData;
+  // 도시이름
+  String cityName;
+  String msg;
 
   void updateData(dynamic weatherData) {
+    cityName = weatherData['name'];
     temp = weatherData['main']['temp'].round();
     detail_weather = weatherData['weather'][0]['description'];
-    print('test : $temp, $detail_weather');
     iconData = weatherData['weather'][0]['icon'];
-    // print(iconData);
+  }
+
+  Future<void> urlRequest({@required String email, @required String pw}) async {
+    String secretCode =
+        DateFormat('yyyyMMdd').format(DateTime.now()).toString() + '박찬휘임준영장인성';
+
+    var nowdate = utf8.encode(secretCode);
+    var digest = sha512.convert(nowdate);
+
+    url = Uri.parse('http://222.110.147.50:8000/addLog/$digest');
+    print(url);
+
+    const Map<String, String> _header = {'Content-Type': 'application/json'};
+    final _body = jsonEncode({'email': email, 'pw': pw});
+
+    try {
+      final http.Response response = await http
+          .post(url, headers: _header, body: _body)
+          .timeout(Duration(seconds: 8),
+              onTimeout: () async => new http.Response('false', 404));
+      // final _result = json.decode(response.body);
+      // final _result = jsonDecode(response.body);
+      final _result = utf8.decode(response.bodyBytes);
+      print(_body);
+      print('성공');
+      print(msg);
+
+      showToast(jsonDecode(_result)['msg']);
+      return _result;
+    } catch (e) {
+      print(e.toString());
+    }
+
+    // await uploader.enqueue(
+    //     url: url,
+    //     files: null,
+    //     method: UploadMethod.POST,
+    //     data: <String, String>{
+    //       'email': emailController.text.toString(),
+    //       'pw': passwordController.text.toString()
+    //     });
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  void showToast(String text) {
+    Fluttertoast.showToast(
+        msg: text,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        gravity: ToastGravity.BOTTOM,
+        toastLength: Toast.LENGTH_SHORT);
   }
 
   @override
@@ -126,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 )),
             Align(
-              alignment: Alignment.center,
+              alignment: Alignment(0.0, 0.0),
               child: Padding(
                 padding:
                     EdgeInsets.only(left: width * 0.05, right: width * 0.05),
@@ -135,6 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     // like_button
                     LoginTextField(
+                      controller: emailController,
                       hint: 'Email',
                       icon: Icons.account_box_rounded,
                       inputType: TextInputType.emailAddress,
@@ -143,6 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: height * 0.02,
                     ),
                     LoginTextField(
+                      controller: passwordController,
                       hint: 'Password',
                       icon: Icons.https,
                       inputType: TextInputType.text,
@@ -161,7 +232,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: Colors.white,
                   icon: Icon(Icons.done),
                   iconSize: width * 0.08,
-                  onPressed: () {},
+                  onPressed: () {
+                    if (cityName == 'Banpobondong') {
+                      urlRequest(
+                          email: emailController.text.toString(),
+                          pw: passwordController.text.toString());
+                    } else {
+                      showToast('불일치');
+                    }
+                  },
                 ),
               ),
             ),

@@ -33,6 +33,10 @@ dependencies:
   like_button: ^2.0.2
   geolocator: ^7.0.3
   http: ^0.13.3
+  intl: ^0.17.0
+  crypto: ^3.0.1
+  fluttertoast: ^8.0.7
+  flutter_uploader: ^1.2.1
 
 dev_dependencies:
   flutter_test:

@@ -13,7 +13,7 @@ class MyLocation {
           desiredAccuracy: LocationAccuracy.high);
       latitude2 = position.latitude;
       longitude2 = position.longitude;
-      print('lat : $latitude2, lon : $longitude2');
+      // print('lat : $latitude2, lon : $longitude2');
     } catch (e) {
       print(e.toString());
     }
