@@ -37,6 +37,9 @@ dependencies:
   crypto: ^3.0.1
   fluttertoast: ^8.0.7
   flutter_dropdown_alert: ^1.0.2
+  mobile_number: ^1.0.4
+  auto_size_text: ^2.1.0
+  pull_to_refresh: ^2.0.0
 
 dev_dependencies:
   flutter_test:
