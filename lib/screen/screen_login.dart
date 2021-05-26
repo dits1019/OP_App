@@ -10,6 +10,7 @@ import 'package:flutter_dropdown_alert/model/data_alert.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_number/mobile_number.dart';
+import 'package:octopus_attendance_book/data/network.dart';
 import 'package:octopus_attendance_book/widget/widget_textfield.dart';
 import 'package:octopus_attendance_book/widget/widget_wave.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -44,19 +45,21 @@ class _LoginScreenState extends State<LoginScreen> {
   String iconData;
   // 도시이름
   String cityName;
+  // phone Number
+  var phone;
+  // 온라인 수업 확인
+  bool online_flag;
 
-  // sim Number
-  var sim;
   @override
   void initState() {
     super.initState();
     updateData(widget.parseWeatherData);
     MobileNumber.listenPhonePermission((isPermissionGranted) {
       if (isPermissionGranted) {
-        getSimNumber();
-      } else {}
+        getPhoneNumber();
+      }
     });
-    getSimNumber();
+    getPhoneNumber();
   }
 
   void updateData(dynamic weatherData) {
@@ -67,8 +70,31 @@ class _LoginScreenState extends State<LoginScreen> {
     // print('성공2');
   }
 
+  Future<void> checkOnline({@required String email}) async {
+    var url = Uri.parse('http://222.110.147.50:8000/checkOnline');
+
+    const Map<String, String> _header = {'Content-Type': 'application/json'};
+
+    final _body = jsonEncode({'email': email});
+
+    try {
+      final http.Response response = await http
+          .post(url, headers: _header, body: _body)
+          .timeout(Duration(seconds: 8),
+              onTimeout: () async => new http.Response('false', 404));
+
+      final _result = response.body;
+
+      online_flag = jsonDecode(_result)['online_flag'];
+      // print('online : $online_flag');
+
+      return _result;
+    } catch (e) {
+      print(e);
+    }
+  }
+
   Future<void> urlRequest({@required String email, @required String pw}) async {
-    var sim;
     String secretCode =
         DateFormat('yyyyMMdd').format(DateTime.now()).toString() + '박찬휘임준영장인성';
 
@@ -79,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
     print(url);
     const Map<String, String> _header = {'Content-Type': 'application/json'};
     final _body =
-        jsonEncode({'email': email, 'pw': pw, 'usim': '4545454'}); // sim
+        jsonEncode({'email': email, 'pw': pw, 'phone': '01035582093'}); // phone
     try {
       final http.Response response = await http
           .post(url, headers: _header, body: _body)
@@ -87,10 +113,13 @@ class _LoginScreenState extends State<LoginScreen> {
               onTimeout: () async => new http.Response('false', 404));
       // final _result = json.decode(response.body);
       // final _result = jsonDecode(response.body);
+
       final _result = utf8.decode(response.bodyBytes);
+
       // print(_body);
       // print('성공');
       // showToast(jsonDecode(_result)['msg']);
+
       if (jsonDecode(_result)['result'] == 'already') {
         AlertController.show(
             '알림',
@@ -104,7 +133,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ? TypeAlert.success
                 : TypeAlert.error);
       }
-      print('sim : $sim');
       return _result;
     } catch (e) {
       print(e);
@@ -112,14 +140,15 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> getSimNumber() async {
+  Future<void> getPhoneNumber() async {
     if (!await MobileNumber.hasPhonePermission) {
       await MobileNumber.requestPhonePermission;
       return;
     }
 
     try {
-      sim = await MobileNumber.mobileNumber;
+      phone = await MobileNumber.mobileNumber.toString().substring(2, 11);
+      print('phone : $phone');
     } catch (e) {
       print(e);
     }
@@ -171,15 +200,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   return Container(
                     decoration: BoxDecoration(
                         gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                          animation["color1"],
-                          animation["color2"]
-                        ])),
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [animation["color1"], animation["color2"]],
+                    )),
                   );
                 },
               ),
+
               // 날씨
               Align(
                 alignment: Alignment.bottomCenter,
@@ -276,20 +304,29 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.white,
                     icon: Icon(Icons.done),
                     iconSize: width * 0.08,
-                    onPressed: () {
+                    onPressed: () async {
                       if (emailController.text.isEmpty ||
                           passwordController.text.isEmpty) {
                         AlertController.show(
                             '알림', 'Email 혹은 Password를 입력해주세요', TypeAlert.error);
                       } else {
-                        if (cityName == 'Banpobondong') {
+                        await checkOnline(
+                            email: emailController.text.toString());
+                        if (online_flag) {
                           urlRequest(
                               email: emailController.text.toString(),
                               pw: passwordController.text.toString());
                         } else {
-                          // showToast('불일치');
-                          AlertController.show(
-                              '알림', '학교에서 다시 앱을 실행해주세요.', TypeAlert.error);
+                          if (cityName == 'Yongsan') {
+                            //Banpobondong
+                            urlRequest(
+                                email: emailController.text.toString(),
+                                pw: passwordController.text.toString());
+                          } else {
+                            // showToast('불일치');
+                            AlertController.show(
+                                '알림', '학교에서 다시 앱을 실행해주세요.', TypeAlert.error);
+                          }
                         }
                       }
                     },

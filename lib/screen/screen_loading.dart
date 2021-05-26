@@ -34,6 +34,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         'https://api.openweathermap.org/data/2.5/weather?lat=$latitude3&lon=$longitude3&appid=$apikey&units=metric&lang=kr');
 
     var weatherData = await weatherNetwork.getJsonData();
+    print(weatherData);
 
     Navigator.pushAndRemoveUntil(
       context,
