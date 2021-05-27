@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cool_alert/cool_alert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_number/mobile_number.dart';
 import 'package:octopus_attendance_book/data/network.dart';
+import 'package:octopus_attendance_book/method/show_toast.dart';
 import 'package:octopus_attendance_book/widget/widget_textfield.dart';
 import 'package:octopus_attendance_book/widget/widget_wave.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -47,8 +49,14 @@ class _LoginScreenState extends State<LoginScreen> {
   String cityName;
   // phone Number
   var phone;
+
   // 온라인 수업 확인
   bool online_flag;
+  // 계정에 핸드폰 번호와 비밀번호가 있는 지 확인하고 없을 경우 추가
+  String phoneisNull;
+  String pwisNull;
+  // 핸드폰 번호와 비밀번호가 있는 지 체크
+  String pwphisNull;
 
   @override
   void initState() {
@@ -84,9 +92,52 @@ class _LoginScreenState extends State<LoginScreen> {
               onTimeout: () async => new http.Response('false', 404));
 
       final _result = response.body;
+      online_flag = await jsonDecode(_result)['online_flag'];
+      phoneisNull = jsonDecode(_result)['phone'];
+      pwisNull = jsonDecode(_result)['pw'];
 
-      online_flag = jsonDecode(_result)['online_flag'];
-      // print('online : $online_flag');
+      print(_result);
+      print('phone : $phoneisNull , pw : $pwisNull');
+      if (phoneisNull == '' || pwisNull == '') {
+        pwphisNull = 'True';
+
+        CoolAlert.show(
+            context: context,
+            type: CoolAlertType.confirm,
+            title: '',
+            text: '사용자 계정에 현재 패스워드와 \n핸드폰 번호를 등록하시겠습니까?',
+            confirmBtnText: '확인',
+            onConfirmBtnTap: () {
+              if (online_flag) {
+                urlRequest(
+                    email: emailController.text.toString(),
+                    pw: passwordController.text.toString());
+              } else {
+                if (cityName == 'Banpobondong') {
+                  // Yongsan
+                  //Banpobondong
+                  urlRequest(
+                      email: emailController.text.toString(),
+                      pw: passwordController.text.toString());
+                } else {
+                  // showToast('불일치');
+                  AlertController.show(
+                      '알림', '학교에서 다시 앱을 실행해주세요.', TypeAlert.error);
+                }
+              }
+              Navigator.pop(context);
+              return _result;
+            },
+            cancelBtnText: '취소',
+            onCancelBtnTap: () {
+              Navigator.pop(context);
+              return false;
+            });
+      } else {
+        print('false false false');
+        pwphisNull = 'False';
+      }
+      print('is Null : $pwphisNull');
 
       return _result;
     } catch (e) {
@@ -100,12 +151,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
     var nowdate = utf8.encode(secretCode);
     var digest = sha512.convert(nowdate);
-
     var url = Uri.parse('http://222.110.147.50:8000/addLog/$digest');
     print(url);
     const Map<String, String> _header = {'Content-Type': 'application/json'};
-    final _body =
-        jsonEncode({'email': email, 'pw': pw, 'phone': '01035582093'}); // phone
+    final _body = jsonEncode({
+      'email': email,
+      'pw': pw,
+      'phone': phone,
+      'isNull': pwphisNull
+    }); // phone
     try {
       final http.Response response = await http
           .post(url, headers: _header, body: _body)
@@ -124,7 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
         AlertController.show(
             '알림',
             '${jsonDecode(_result)['msg']}\n이미 ${jsonDecode(_result)['time']}에 출석했습니다',
-            TypeAlert.error);
+            TypeAlert.warning);
       } else {
         AlertController.show(
             '알림',
@@ -145,9 +199,9 @@ class _LoginScreenState extends State<LoginScreen> {
       await MobileNumber.requestPhonePermission;
       return;
     }
-
     try {
-      phone = await MobileNumber.mobileNumber.toString().substring(2, 11);
+      phone = await MobileNumber.mobileNumber;
+      phone = phone.toString().substring(2, 13);
       print('phone : $phone');
     } catch (e) {
       print(e);
@@ -159,15 +213,6 @@ class _LoginScreenState extends State<LoginScreen> {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
-  }
-
-  void showToast(String text) {
-    Fluttertoast.showToast(
-        msg: text,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        gravity: ToastGravity.BOTTOM,
-        toastLength: Toast.LENGTH_SHORT);
   }
 
   @override
@@ -312,20 +357,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       } else {
                         await checkOnline(
                             email: emailController.text.toString());
-                        if (online_flag) {
-                          urlRequest(
-                              email: emailController.text.toString(),
-                              pw: passwordController.text.toString());
-                        } else {
-                          if (cityName == 'Yongsan') {
-                            //Banpobondong
+                        if (pwphisNull == 'False') {
+                          if (online_flag) {
                             urlRequest(
                                 email: emailController.text.toString(),
                                 pw: passwordController.text.toString());
                           } else {
-                            // showToast('불일치');
-                            AlertController.show(
-                                '알림', '학교에서 다시 앱을 실행해주세요.', TypeAlert.error);
+                            if (cityName == 'Yongsan') {
+                              // Yongsan
+                              //Banpobondong
+                              urlRequest(
+                                  email: emailController.text.toString(),
+                                  pw: passwordController.text.toString());
+                            } else {
+                              // showToast('불일치');
+                              AlertController.show(
+                                  '알림', '학교에서 다시 앱을 실행해주세요.', TypeAlert.error);
+                            }
                           }
                         }
                       }
