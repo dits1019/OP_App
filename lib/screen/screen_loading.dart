@@ -33,14 +33,19 @@ class _LoadingScreenState extends State<LoadingScreen> {
     Network weatherNetwork = Network(
         'https://api.openweathermap.org/data/2.5/weather?lat=$latitude3&lon=$longitude3&appid=$apikey&units=metric&lang=kr');
 
+    Network studentsNetwork = Network('http://222.110.147.50:8000/getStudent');
+
     var weatherData = await weatherNetwork.getJsonData();
-    print(weatherData);
+    var studentsData = await studentsNetwork.getJsonData();
+    // print(weatherData);
 
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
-          builder: (BuildContext context) =>
-              LoginScreen(parseWeatherData: weatherData)),
+          builder: (BuildContext context) => LoginScreen(
+                parseWeatherData: weatherData,
+                parseStudents: studentsData,
+              )),
       (route) => false,
     );
   }

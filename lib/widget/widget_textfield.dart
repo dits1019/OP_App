@@ -28,7 +28,7 @@ class LoginTextField extends StatelessWidget {
         obscureText: hideText,
         keyboardType: inputType,
         controller: controller,
-        style: TextStyle(fontFamily: 'Yangjin', fontSize: 17),
+        style: TextStyle(fontSize: 17),
         decoration: InputDecoration(
           hintStyle: TextStyle(fontSize: 17),
           hintText: hint,

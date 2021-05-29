@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:cool_alert/cool_alert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
@@ -21,8 +22,9 @@ import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
   dynamic parseWeatherData;
+  dynamic parseStudents;
 
-  LoginScreen({this.parseWeatherData});
+  LoginScreen({this.parseWeatherData, this.parseStudents});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -58,10 +60,14 @@ class _LoginScreenState extends State<LoginScreen> {
   // 핸드폰 번호와 비밀번호가 있는 지 체크
   String pwphisNull;
 
+  // 자동 완성을 위한 리스트
+  List<String> studentsList = [];
+
   @override
   void initState() {
     super.initState();
     updateData(widget.parseWeatherData);
+    getStudents(widget.parseStudents);
     MobileNumber.listenPhonePermission((isPermissionGranted) {
       if (isPermissionGranted) {
         getPhoneNumber();
@@ -76,6 +82,10 @@ class _LoginScreenState extends State<LoginScreen> {
     detail_weather = weatherData['weather'][0]['description'];
     iconData = weatherData['weather'][0]['icon'];
     // print('성공2');
+  }
+
+  void getStudents(dynamic studentsData) {
+    studentsData.forEach((student) => studentsList.add(student['email']));
   }
 
   Future<void> checkOnline({@required String email}) async {
@@ -96,8 +106,8 @@ class _LoginScreenState extends State<LoginScreen> {
       phoneisNull = jsonDecode(_result)['phone'];
       pwisNull = jsonDecode(_result)['pw'];
 
-      print(_result);
-      print('phone : $phoneisNull , pw : $pwisNull');
+      // print(_result);
+      // print('phone : $phoneisNull , pw : $pwisNull');
       if (phoneisNull == '' || pwisNull == '') {
         pwphisNull = 'True';
 
@@ -319,12 +329,47 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // like_button
-                      LoginTextField(
-                        controller: emailController,
-                        hint: 'Email',
-                        icon: Icons.account_box_rounded,
-                        inputType: TextInputType.emailAddress,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(width * 0.01),
+                        ),
+                        child: AutoCompleteTextField(
+                          suggestions: studentsList,
+                          itemFilter: (item, query) {
+                            return item
+                                .toLowerCase()
+                                .startsWith(query.toLowerCase());
+                          },
+                          itemSorter: (a, b) {
+                            return a.compareTo(b);
+                          },
+                          itemSubmitted: (item) {
+                            emailController.text = item;
+                          },
+                          itemBuilder: (context, item) {
+                            return Container(
+                              padding: EdgeInsets.all(width * 0.05),
+                              child: Row(
+                                children: [Text(item)],
+                              ),
+                            );
+                          },
+                          clearOnSubmit: false,
+                          keyboardType: TextInputType.emailAddress,
+                          controller: emailController,
+                          style: TextStyle(fontSize: 17),
+                          decoration: InputDecoration(
+                            hintStyle: TextStyle(fontSize: 17),
+                            hintText: 'Email',
+                            suffixIcon: Icon(
+                              Icons.account_box_rounded,
+                              color: Colors.grey,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.all(width * 0.03),
+                          ),
+                        ),
                       ),
                       SizedBox(
                         height: height * 0.02,
@@ -363,7 +408,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 email: emailController.text.toString(),
                                 pw: passwordController.text.toString());
                           } else {
-                            if (cityName == 'Yongsan') {
+                            if (cityName == 'Yongsan' ||
+                                cityName == 'Banpobondong') {
                               // Yongsan
                               //Banpobondong
                               urlRequest(
