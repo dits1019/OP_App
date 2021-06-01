@@ -13,6 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_number/mobile_number.dart';
 import 'package:octopus_attendance_book/data/network.dart';
+import 'package:octopus_attendance_book/method/get_data.dart';
 import 'package:octopus_attendance_book/method/show_toast.dart';
 import 'package:octopus_attendance_book/widget/widget_textfield.dart';
 import 'package:octopus_attendance_book/widget/widget_wave.dart';
@@ -37,8 +38,9 @@ class _LoginScreenState extends State<LoginScreen> {
       RefreshController(initialRefresh: false);
 
   void _onRefresh() async {
-    await updateData(widget.parseWeatherData);
-    // print('성공');
+    var weatherData = await getWeatherData();
+    updateData(weatherData);
+
     _refreshController.refreshCompleted();
   }
 
@@ -81,7 +83,6 @@ class _LoginScreenState extends State<LoginScreen> {
     temp = weatherData['main']['temp'].round();
     detail_weather = weatherData['weather'][0]['description'];
     iconData = weatherData['weather'][0]['icon'];
-    // print('성공2');
   }
 
   void getStudents(dynamic studentsData) {
@@ -106,8 +107,6 @@ class _LoginScreenState extends State<LoginScreen> {
       phoneisNull = jsonDecode(_result)['phone'];
       pwisNull = jsonDecode(_result)['pw'];
 
-      // print(_result);
-      // print('phone : $phoneisNull , pw : $pwisNull');
       if (phoneisNull == '' || pwisNull == '') {
         pwphisNull = 'True';
 
@@ -123,14 +122,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     email: emailController.text.toString(),
                     pw: passwordController.text.toString());
               } else {
-                if (cityName == 'Banpobondong') {
-                  // Yongsan
-                  //Banpobondong
+                if (cityName == 'Banpobondong' || cityName == 'Yongsan') {
                   urlRequest(
                       email: emailController.text.toString(),
                       pw: passwordController.text.toString());
                 } else {
-                  // showToast('불일치');
                   AlertController.show(
                       '알림', '학교에서 다시 앱을 실행해주세요.', TypeAlert.error);
                 }
@@ -144,11 +140,8 @@ class _LoginScreenState extends State<LoginScreen> {
               return false;
             });
       } else {
-        print('false false false');
         pwphisNull = 'False';
       }
-      print('is Null : $pwphisNull');
-
       return _result;
     } catch (e) {
       print(e);
@@ -175,14 +168,8 @@ class _LoginScreenState extends State<LoginScreen> {
           .post(url, headers: _header, body: _body)
           .timeout(Duration(seconds: 8),
               onTimeout: () async => new http.Response('false', 404));
-      // final _result = json.decode(response.body);
-      // final _result = jsonDecode(response.body);
 
       final _result = utf8.decode(response.bodyBytes);
-
-      // print(_body);
-      // print('성공');
-      // showToast(jsonDecode(_result)['msg']);
 
       if (jsonDecode(_result)['result'] == 'already') {
         AlertController.show(
@@ -212,7 +199,6 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       phone = await MobileNumber.mobileNumber;
       phone = phone.toString().substring(2, 13);
-      print('phone : $phone');
     } catch (e) {
       print(e);
     }
@@ -410,13 +396,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           } else {
                             if (cityName == 'Yongsan' ||
                                 cityName == 'Banpobondong') {
-                              // Yongsan
-                              //Banpobondong
                               urlRequest(
                                   email: emailController.text.toString(),
                                   pw: passwordController.text.toString());
                             } else {
-                              // showToast('불일치');
                               AlertController.show(
                                   '알림', '학교에서 다시 앱을 실행해주세요.', TypeAlert.error);
                             }

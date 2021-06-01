@@ -1,10 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart';
-import 'package:octopus_attendance_book/data/my_location.dart';
-import 'package:octopus_attendance_book/data/network.dart';
+import 'package:octopus_attendance_book/method/get_data.dart';
 import 'package:octopus_attendance_book/screen/screen_login.dart';
 
 const apikey = '718fc9176c8b844ffce641eaafc01955';
@@ -21,24 +17,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   void initState() {
     super.initState();
-    getLocation();
+    getData();
   }
 
-  void getLocation() async {
-    MyLocation myLocation = MyLocation();
-    await myLocation.getMyCurrentLocation();
-    latitude3 = myLocation.latitude2;
-    longitude3 = myLocation.longitude2;
-
-    Network weatherNetwork = Network(
-        'https://api.openweathermap.org/data/2.5/weather?lat=$latitude3&lon=$longitude3&appid=$apikey&units=metric&lang=kr');
-
-    Network studentsNetwork = Network('http://222.110.147.50:8000/getStudent');
-
-    var weatherData = await weatherNetwork.getJsonData();
-    var studentsData = await studentsNetwork.getJsonData();
-    // print(weatherData);
-
+  void getData() async {
+    var weatherData = await getWeatherData();
+    var studentsData = await getStudentsData();
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
