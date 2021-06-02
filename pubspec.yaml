@@ -42,6 +42,12 @@ dependencies:
   pull_to_refresh: ^2.0.0
   cool_alert: ^1.1.0
   autocomplete_textfield: ^1.7.3
+  flutter_launcher_icons: ^0.9.0
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: 'images/logo.ico'
 
 dev_dependencies:
   flutter_test:
