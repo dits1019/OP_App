@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
    <application
-        android:label="octopus_attendance_book"
+        android:label="디지텍 출석부"
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <activity
