@@ -217,6 +217,8 @@ class _LoginScreenState extends State<LoginScreen> {
     double height = MediaQuery.of(context).size.height;
 
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    // color1과 color2라는 이름으로 두 개의 트랙을 정의
+    // 미러링된 애니메이션 사용
     final tween = MultiTrackTween([
       Track("color1").add(Duration(seconds: 3),
           ColorTween(begin: Color(0xffe4fbff), end: Colors.blueAccent[700])),
