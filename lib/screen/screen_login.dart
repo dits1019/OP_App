@@ -68,8 +68,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    // 날씨 데이터 가져오기
     updateData(widget.parseWeatherData);
+    // 학생 데이터 가져오기
     getStudents(widget.parseStudents);
+    // 권한 확인
     MobileNumber.listenPhonePermission((isPermissionGranted) {
       if (isPermissionGranted) {
         getPhoneNumber();
@@ -78,6 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
     getPhoneNumber();
   }
 
+  // 날씨 데이터를 가져와서 변수 안에 넣기
   void updateData(dynamic weatherData) {
     cityName = weatherData['name'];
     temp = weatherData['main']['temp'].round();
@@ -85,10 +89,12 @@ class _LoginScreenState extends State<LoginScreen> {
     iconData = weatherData['weather'][0]['icon'];
   }
 
+  // 학생 데이터를 학생 리스트에 넣기
   void getStudents(dynamic studentsData) {
     studentsData.forEach((student) => studentsList.add(student['email']));
   }
 
+  // 온라인 수업인지 체크
   Future<void> checkOnline({@required String email}) async {
     var url = Uri.parse('http://222.110.147.50:8000/checkOnline');
 
@@ -148,6 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // 데이터를 서버로 보내기
   Future<void> urlRequest({@required String email, @required String pw}) async {
     String secretCode =
         DateFormat('yyyyMMdd').format(DateTime.now()).toString() + '박찬휘임준영장인성';
@@ -191,6 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // 핸드폰 번호 가져오기
   Future<void> getPhoneNumber() async {
     if (!await MobileNumber.hasPhonePermission) {
       await MobileNumber.requestPhonePermission;
@@ -235,6 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
           onRefresh: _onRefresh,
           child: Stack(
             children: [
+              // 배경 애니메이션
               ControlledAnimation(
                 playback: Playback.MIRROR,
                 tween: tween,
@@ -251,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
               ),
 
-              // 날씨
+              // 아래쪽으로 파도 붙이기
               Align(
                 alignment: Alignment.bottomCenter,
                 child: AnimatedWave(
@@ -317,6 +326,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // 자동완성이 되는 email 입력칸
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -362,6 +372,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(
                         height: height * 0.02,
                       ),
+                      // 비밀번호 입력칸
                       LoginTextField(
                         controller: passwordController,
                         hint: 'Password',
@@ -373,6 +384,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+              // 체크 버튼
               Align(
                 alignment: Alignment(0.0, 0.8),
                 child: CircleAvatar(
@@ -383,6 +395,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     icon: Icon(Icons.done),
                     iconSize: width * 0.08,
                     onPressed: () async {
+                      // TextField가 비어있는지 확인
                       if (emailController.text.isEmpty ||
                           passwordController.text.isEmpty) {
                         AlertController.show(
@@ -390,7 +403,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       } else {
                         await checkOnline(
                             email: emailController.text.toString());
+                        // 비밀번호와 핸드폰 번호가 학생에게 있는지 확인
                         if (pwphisNull == 'False') {
+                          // 온라인 수업인지 확인
                           if (online_flag) {
                             urlRequest(
                                 email: emailController.text.toString(),
