@@ -18,6 +18,7 @@ import 'package:octopus_attendance_book/method/show_toast.dart';
 import 'package:octopus_attendance_book/widget/widget_textfield.dart';
 import 'package:octopus_attendance_book/widget/widget_wave.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:http/http.dart' as http;
 
@@ -65,6 +66,11 @@ class _LoginScreenState extends State<LoginScreen> {
   // 자동 완성을 위한 리스트
   List<String> studentsList = [];
 
+  // 캐싱을 위한 선언
+  String _email = '';
+  String _pw = '';
+  SharedPreferences _prefs;
+
   @override
   void initState() {
     super.initState();
@@ -79,6 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     });
     getPhoneNumber();
+    _loadCaching();
   }
 
   // 날씨 데이터를 가져와서 변수 안에 넣기
@@ -210,6 +217,32 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       print(e);
     }
+  }
+
+  // 캐시에 있는 데이터를 불러옴
+  _loadCaching() async {
+    // 캐시에 저장되어있는 값을 불러옴
+    _prefs = await SharedPreferences.getInstance();
+    // 캐시에 저장된 값을 반영하여 현재 상태 설정
+    setState(() {
+      // null일 경우 공백으로
+      // 키값으로 가져오기
+      _email = (_prefs.getString('email') ?? '');
+      _pw = (_prefs.getString('pw') ?? '');
+      emailController.text = _email;
+      passwordController.text = _pw;
+      print('저장된 이메일 : $_email');
+      print('저장된 비밀번호 : $_pw');
+    });
+  }
+
+  // 캐시에 데이터를 넣어줌
+  _uploadCaching() {
+    _email = emailController.text.toString();
+    _pw = passwordController.text.toString();
+    // 키와 값을 캐시에 넣어줌
+    _prefs.setString('email', _email);
+    _prefs.setString('pw', _pw);
   }
 
   @override
@@ -423,6 +456,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           }
                         }
                       }
+                      _uploadCaching();
                     },
                   ),
                 ),

@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     return MaterialApp(
-        title: 'OP_App',
+        title: '디지텍 출석',
         debugShowCheckedModeBanner: false,
         builder: (context, child) => Stack(
               children: [child, DropdownAlert()],
