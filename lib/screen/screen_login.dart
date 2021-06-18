@@ -69,6 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // 캐싱을 위한 선언
   String _email = '';
   String _pw = '';
+  var _pwCrypto;
   SharedPreferences _prefs;
 
   @override
@@ -238,11 +239,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // 캐시에 데이터를 넣어줌
   _uploadCaching() {
+    _pwCrypto = utf8.encode(passwordController.text.toString());
     _email = emailController.text.toString();
     _pw = passwordController.text.toString();
     // 키와 값을 캐시에 넣어줌
     _prefs.setString('email', _email);
-    _prefs.setString('pw', _pw);
+    _prefs.setString('pw', _pwCrypto);
   }
 
   @override
