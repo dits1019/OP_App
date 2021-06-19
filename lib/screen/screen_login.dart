@@ -229,7 +229,8 @@ class _LoginScreenState extends State<LoginScreen> {
       // null일 경우 공백으로
       // 키값으로 가져오기
       _email = (_prefs.getString('email') ?? '');
-      _pw = (_prefs.getString('pw') ?? '');
+
+      _pw = (utf8.decode(base64.decode(_prefs.getString('pw'))) ?? '');
       emailController.text = _email;
       passwordController.text = _pw;
       print('저장된 이메일 : $_email');
@@ -239,9 +240,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // 캐시에 데이터를 넣어줌
   _uploadCaching() {
-    _pwCrypto = utf8.encode(passwordController.text.toString());
-    _email = emailController.text.toString();
     _pw = passwordController.text.toString();
+    // 비밀번호를 base64로 암호화
+    _pwCrypto = base64.encode(utf8.encode(_pw));
+    _email = emailController.text.toString();
+
     // 키와 값을 캐시에 넣어줌
     _prefs.setString('email', _email);
     _prefs.setString('pw', _pwCrypto);
