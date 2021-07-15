@@ -95,6 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
     temp = weatherData['main']['temp'].round();
     detail_weather = weatherData['weather'][0]['description'];
     iconData = weatherData['weather'][0]['icon'];
+    print('현재 위치 : $cityName');
   }
 
   // 학생 데이터를 학생 리스트에 넣기
@@ -274,6 +275,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return SafeArea(
       child: Scaffold(
+        // 키보드를 열었을 시 UI들이 밀려나는 것을 막음
+        resizeToAvoidBottomInset: false,
         body: SmartRefresher(
           enablePullDown: true,
           header: WaterDropMaterialHeader(backgroundColor: Colors.black),
